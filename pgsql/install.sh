@@ -1,0 +1,59 @@
+#!/bin/bash
+
+echo "downloading the postgresql..."
+
+curl -# -o postgresql-9.2.4.tar.gz  ftp://ftp.postgresql.org/pub/source/v9.2.4/postgresql-9.2.4.tar.gz
+
+deploy(){
+	read -p "please specify a target folder to deploy : " target_folder
+	read -p "are you sure to deploy the postgresql to $target_folder? [y/n] " confirm
+	if [ $confirm == y ];
+		then 
+			echo "extracting..."
+			tar xf postgresql-9.2.4.tar 
+
+			echo "deploying..."
+			sudo mv -f postgresql-9.2.4 $target_folder
+
+			echo "configure..."
+			pgsqlFolder="$target_folder/postgresql-9.2.4"
+			cd $pgsqlFolder
+			./configure
+
+			echo "building..."
+			make
+			echo "check..."
+			make check
+			echo "install..."
+			make install
+			echo "clean..."
+			make clean
+
+			# echo "adding the bin folder into PATH environment variables"
+			# PATH = $PATH:'$pgsqlFolder/bin'
+
+			echo "creating the data folder..."
+			sudo mkdir '/var/lib/postgresql-9.2.4'
+			sudo mkdir '/var/lib/postgresql-9.2.4/data'
+
+			pgsqlDataFolder='/var/lib/postgresql-9.2.4/data'
+
+			read -p "please specify the pgsql account "  account
+			sudo chown $account:$account $pgsqlDataFolder
+
+			echo "initdb..."
+			pg_ctl -D $pgsqlDataFolder initdb
+
+			echo "creating log file folder..."
+			logFolder='/var/log/postgresql-9.2.4'
+			sudo mkdir $logFolder
+			sudo chown $account:$account $logFolder
+
+			echo "complete!"
+
+		else
+			deploy;
+	fi 
+}
+
+deploy;
