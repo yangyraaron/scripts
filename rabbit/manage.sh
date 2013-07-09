@@ -7,24 +7,45 @@ status(){
 	$ctl status
 }
 
-addVhost(){
-	$ctl add_vhost $1
-}
-
-listVhosts(){
+list_Vhosts(){
 	$ctl list_vhosts
 }
 
-stop_node(){
-	if [ -z $1 ]; then
-		echo "please sepcify host "
-		rout stopnode
+add_Vhost(){
+	read -p "sepcify virtual host name " host
+
+	if [ -z $host ];then
+		echo "the virtual host is need"
+		return 1
 	fi
 
-	host = rabbit@$1
+	$ctl add_vhost $host
+	return 0
+}
+
+stop_node(){
+	read -p "sepcify virtual host " host
+
+	if [ -z $host ]; then
+		read -p "are you want to stop local node " yes_or_no
+
+		case $yes_or_no in
+			yes|YES|y|Y )
+			$ctl stop
+			return 0
+				;;
+		esac
+
+		echo "the virtual host can not be empty"
+		return 1
+	fi
+
+	server = rabbit@$host
 	echo "trying to stop the $host rabbit node "
-	$ctl -n $host
+	$ctl -n $server -p stop
 	echo "node stopped"
+
+	return 0
 }
 
 stop_rabbit(){
@@ -47,32 +68,40 @@ start_rabbit(){
 }
 
 add_user(){
-	if [ -z $1 ]; then
-		echo "please sepcify user account "
-		rout adduser
+    read -p "sepcify the user account and password you want to add " user password
+
+	if [ -z $user ]; then
+		echo "user account can not be empty "
+		return 1
 	fi
 
 	echo "trying to add user $1 and pwd $2"
-	$ctl add_user $1 $2
+	$ctl add_user $user $password
 	echo "user added"
+
+	return 0
 }
 
 delete_user(){
-	if [ -z $1 ]; then
-		echo "please sepcify user account "
-		rout deleteuser
+	read -p "sepcify the user account you want to delete " user
+
+	if [ -z $user ]; then
+		echo "user account can not be emtpy"
+		return 1
 	fi
 
-	echo "are you sure to delete user $1 ? y/n "
+	echo "are you sure to delete user $user ? y/n "
 	read yes_or_no
 
-	case yes_or_no in
-		yes|y|Y|YES)
+	case $yes_or_no in
+		yes|y|YES|Y)
 		echo "trying to delete user $1 "
-		$ctl delete_user $1
+		$ctl delete_user $user
 		echo "user deleted"
 		;;
 	esac
+
+	return 0
 }
 
 list_users(){
@@ -80,108 +109,123 @@ list_users(){
 }
 
 change_password(){
-	if [ -z $1 ]; then
-		echo "please sepcify the user account "
-		rout changepassword
+	read -p "sepcify the user account you want to change the password to and what the passowd value " user passowd
+
+	if [ -z $user ]; then
+		echo "user account can not be empty "
+		return 1
 	fi
 
-	if [ -z $2 ]; then
+	if [ -z $passowd ]; then
 		echo "please sepcify the new password "
+		return 1
 	fi
 
-	$ctl change_password $1 $2
+	$ctl change_password $user $password
+
+	return 0
 }
 
 set_permssion(){
-	host=$1
-	user=$2
-	r_config=$3
-	r_write=$4
-	r_read=$5
+	read -p "the parameters needed 1:vhost 2:user 3:config  4:write 5:read " host user r_config r_write r_read
 
 	if [ -z $host ];then
 		echo "the virtual host is needed"
-		rout set_permssion
+		return 1
 	fi
 
 	if [ -z $user ];then
 		echo "the user is needed"
-		rout set_permssion
+		return 1
 	fi
 
 
 	$ctl set_permssions -p $host $user $r_config $r_write $r_read
+
+	return 0
 }
 
-rout(){
-	isHandled=1;
-	case $1 in
-	startnode)
-	start_node
-	isHandled=0;
-	;;
+permissions(){
+	read -p "sepcify 1:type {-v:host -u:user} 2:host/user " t n
 
-	status)
-	status
-	isHandled=0;
-	;;
+	if [ -z $t ];then
+		echo "what type of permissions you want to look, host or user"
+		return 1
+	fi
 
-	start)
-	start_rabbit
-	isHandled=0;
-	;;
+	case $t in
+		-v)
+		
+		if [ -z $n ];then
+			echo "the virtual host is needed"
+			return 1
+		fi
 
-	addhost)
-	read -p "sepcify virtual host name " vhost
-	addVhost $vhost
-	isHandled=0;
-	;;
+		$ctl list_permissions -p $n
+		;;
+		-u)
+		if [ -z $n ];then
+			echo "the user is needed"
+			return 1
+		fi
+		$ctl list_user_permissions $n
+		;;
+	esac
 
-	hosts)
-	listVhosts
-	isHandled=0;
-	;;
+	return 0
+}
 
-	stop)
-	stop_rabbit
-	isHandled=0;
-	;;
+clear_permission(){
+	read -p "sepcify 1:host 2:user" host user
 
-	stopnode)
-	read -p "sepcify host name " host
-	stop_node $host
-	isHandled=0;
-	;;
+	if [ -z $host ];then
+		echo "the virtual host is needed"
+		return 1
+	fi
 
-	adduser)
-    read -p "sepcify the user account and password you want to add " user password
-	add_user $user $password
-	isHandled=0;
-	;;
+	if [ -z $user ];then
+			echo "the user is needed"
+			return 1
+	fi
 
-	deleteuser)
-	read -p "sepcify the user account you want to delete " user
-	delete_user $user
-	isHandled=0;
-	;;
+	$ctl clear_permissions -p $host $user
 
-	users)
-	list_users
-	isHandled=0;
-	;;
+	return 0
+}
 
-	changepassword)
-	read -p "sepcify the user account you want to change the password to and what the passowd value " user passowd
-	change_password $user $passowd
-	isHandled=0;
-	;;
+declare -A fun_table fun_table=(["status"]=status 
+		["addhost"]=add_Vhost 
+		["hosts"]=list_Vhosts 
+		["stopnode"]=stop_node 
+		["stop"]=stop_rabbit 
+		["startnode"]=start_node 
+		["start"]=start_rabbit 
+		["adduser"]=add_user 
+		["deleteuser"]=delete_user  
+		["users"]=list_users 
+		["changepassword"]=change_password 
+		["setpermission"]=set_permssion 
+		["permissions"]=permissions 
+		["clearpermission"]=clear_permission)
 
-esac
-if [ isHandled ]; then
-	echo "command can not be found "
-fi
-#to to head looply
-heading
+recusive_exe(){
+	cmd=$1
+	shift 1
+
+	method=${fun_table[$cmd]}
+
+	if [ -z $method ];then
+		echo "command not found "
+		heading
+	fi
+
+	eval "$method $@"
+
+	if [ ! $? ];then
+		recusive_exe $cmd
+	else
+		heading
+	fi
 }
 
 heading(){
@@ -191,7 +235,7 @@ heading(){
 		exit 0
 	fi
 
-	rout $cmd
+	recusive_exe $cmd
 }
 
 heading
