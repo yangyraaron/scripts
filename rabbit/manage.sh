@@ -40,7 +40,7 @@ stop_node(){
 		return 1
 	fi
 
-	server = rabbit@$host
+	server=rabbit@$host
 	echo "trying to stop the $host rabbit node "
 	$ctl -n $server -p stop
 	echo "node stopped"
@@ -109,14 +109,14 @@ list_users(){
 }
 
 change_password(){
-	read -p "sepcify the user account you want to change the password to and what the passowd value " user passowd
+	read -p "sepcify the user account you want to change the password to and what the passowd value " user password
 
 	if [ -z $user ]; then
 		echo "user account can not be empty "
 		return 1
 	fi
 
-	if [ -z $passowd ]; then
+	if [ -z $password ]; then
 		echo "please sepcify the new password "
 		return 1
 	fi
@@ -130,17 +130,17 @@ set_permssion(){
 	read -p "the parameters needed 1:vhost 2:user 3:config  4:write 5:read " host user r_config r_write r_read
 
 	if [ -z $host ];then
-		echo "the virtual host is needed"
+		echo "the virtual host is needed "
 		return 1
 	fi
 
 	if [ -z $user ];then
-		echo "the user is needed"
+		echo "the user is needed "
 		return 1
 	fi
 
 
-	$ctl set_permssions -p $host $user $r_config $r_write $r_read
+	$ctl set_permissions -p $host $user $r_config $r_write $r_read
 
 	return 0
 }
@@ -149,7 +149,7 @@ permissions(){
 	read -p "sepcify 1:type {-v:host -u:user} 2:host/user " t n
 
 	if [ -z $t ];then
-		echo "what type of permissions you want to look, host or user"
+		echo "what type of permissions you want to look, host or user "
 		return 1
 	fi
 
@@ -176,21 +176,39 @@ permissions(){
 }
 
 clear_permission(){
-	read -p "sepcify 1:host 2:user" host user
+	read -p "sepcify 1:host 2:user " host user
 
 	if [ -z $host ];then
-		echo "the virtual host is needed"
+		echo "the virtual host is needed "
 		return 1
 	fi
 
 	if [ -z $user ];then
-			echo "the user is needed"
+			echo "the user is needed "
 			return 1
 	fi
 
 	$ctl clear_permissions -p $host $user
 
 	return 0
+}
+
+queues(){
+	read -p "sepcify host " host 
+	if [ -z $host ];then
+		$ctl list_queues name messages consumers memory
+	else
+		echo "display queues of default virtual host "
+		$ctl list_queues -p $host name messages consumers memory
+	fi
+}
+
+exchanges(){
+	$ctl list_exchanges name 'type' durable auto_delete
+}
+
+bindings(){
+	$ctl list_bindings 
 }
 
 declare -A fun_table fun_table=(["status"]=status 
@@ -206,7 +224,10 @@ declare -A fun_table fun_table=(["status"]=status
 		["changepassword"]=change_password 
 		["setpermission"]=set_permssion 
 		["permissions"]=permissions 
-		["clearpermission"]=clear_permission)
+		["clearpermission"]=clear_permission 
+		["queues"]=queues 
+		['exchanges']=exchanges 
+		['bindings']=bindings)
 
 recusive_exe(){
 	cmd=$1
