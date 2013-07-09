@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash 
 
 read -p "please specify the file to be executed " file
 
