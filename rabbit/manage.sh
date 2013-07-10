@@ -140,7 +140,7 @@ set_permssion(){
 	fi
 
 
-	$ctl set_permissions -p $host $user $r_config $r_write $r_read
+	$ctl set_permissions -p $host $user "$r_config" "$r_write" "$r_read"
 
 	return 0
 }
@@ -242,6 +242,7 @@ recusive_exe(){
 
 	eval "$method $@"
 
+	#check the last exit code $? if 1 then execute
 	if [ ! $? ];then
 		recusive_exe $cmd
 	else
