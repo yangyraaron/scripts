@@ -97,7 +97,7 @@ delete_user(){
 		yes|y|YES|Y)
 		echo "trying to delete user $1 "
 		$ctl delete_user $user
-		echo "user deleted"
+		echo "user deleted "
 		;;
 	esac
 
@@ -109,19 +109,21 @@ list_users(){
 }
 
 change_password(){
-	read -p "sepcify the user account you want to change the password to and what the passowd value " user password
+
+	read -p "sepcify the user account " user 
+	read -p "type the password " pass
 
 	if [ -z $user ]; then
 		echo "user account can not be empty "
 		return 1
 	fi
 
-	if [ -z $password ]; then
+	if [ -z $pass ]; then
 		echo "please sepcify the new password "
 		return 1
 	fi
 
-	$ctl change_password $user $password
+	$ctl change_password $user $pass
 
 	return 0
 }
@@ -138,8 +140,25 @@ set_permssion(){
 		echo "the user is needed "
 		return 1
 	fi
+	# a_config=''
+	# a_write=''
+	# a_read=''
+	if [ "$r_config" = \"\" ];then
+		#echo "config empty"
+		r_config=''
+	fi
 
+	if [ "$r_write" = \"\" ];then
+		#echo "write empty"
+		r_write=''
+	fi
 
+	if [ "$r_read" = \"\" ];then
+		#echo "read empty"
+		r_read=''
+	fi
+
+	#echo " config:$a_config wirte:$a_write read:$a_read"
 	$ctl set_permissions -p $host $user "$r_config" "$r_write" "$r_read"
 
 	return 0
@@ -245,19 +264,24 @@ recusive_exe(){
 	#check the last exit code $? if 1 then execute
 	if [ ! $? ];then
 		recusive_exe $cmd
-	else
-		heading
+	# else
+	# 	heading
 	fi
 }
 
 heading(){
-	read -p "please type your command " cmd 
+
+	while [[ 0 ]]; do
+		read -p "please type your command " cmd 
 
 	if [ $cmd = "exit" ]; then
 		exit 0
 	fi
 
 	recusive_exe $cmd
+	
+	done
+	
 }
 
 heading
