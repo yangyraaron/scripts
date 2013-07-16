@@ -24,10 +24,10 @@ add_Vhost(){
 }
 
 stop_node(){
-	read -p "sepcify virtual host " host
+	read -p "sepcify host " host
 
 	if [ -z $host ]; then
-		read -p "are you want to stop local node " yes_or_no
+		read -p "are you want to stop local node y/n? " yes_or_no
 
 		case $yes_or_no in
 			yes|YES|y|Y )
@@ -36,13 +36,13 @@ stop_node(){
 				;;
 		esac
 
-		echo "the virtual host can not be empty"
+		echo "the host can not be empty"
 		return 1
 	fi
 
-	server=rabbit@$host
+	server=$host@$HOSTNAME
 	echo "trying to stop the $host rabbit node "
-	$ctl -n $server -p stop
+	$ctl -n $server stop
 	echo "node stopped"
 
 	return 0
@@ -223,13 +223,30 @@ queues(){
 }
 
 exchanges(){
-	$ctl list_exchanges name 'type' durable auto_delete
+	read -p "sepcify host " host 
+
+	if [ -z $host ];then
+		$ctl list_exchanges name 'type' durable auto_delete
+	else
+		$ctl list_exchanges -p $host name 'type' durable auto_delete
+	fi
+
 }
 
 bindings(){
+	read -p "sepcify host " host 
+
+	if [[ -z $host ]]; then
+	$ctl list_bindings -p $host
+	else
 	$ctl list_bindings 
+	fi
+
 }
 
+clusters(){
+	$ctl cluster_status
+}
 declare -A fun_table fun_table=(["status"]=status 
 		["addhost"]=add_Vhost 
 		["hosts"]=list_Vhosts 
@@ -246,7 +263,8 @@ declare -A fun_table fun_table=(["status"]=status
 		["clearpermission"]=clear_permission 
 		["queues"]=queues 
 		['exchanges']=exchanges 
-		['bindings']=bindings)
+		['bindings']=bindings 
+		['clusters']=clusters)
 
 recusive_exe(){
 	cmd=$1
