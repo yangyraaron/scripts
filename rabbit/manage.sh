@@ -4,27 +4,42 @@ ctl=/usr/local/rabbitmq_server-3.1.3/sbin/rabbitmqctl
 server=/usr/local/rabbitmq_server-3.1.3/sbin/rabbitmq-server
 
 status(){
-	$ctl status
+	read -p "specify node " node
+	if [[ -z $node ]]; then
+		node=rabbit
+	fi
+
+	$ctl -n $node@$HOSTNAME status
 }
 
 list_Vhosts(){
-	$ctl list_vhosts
+	read -p "specify node " node
+	if [[ -z $node ]]; then
+		node=rabbit
+	fi
+
+	$ctl -n $node@$HOSTNAME list_vhosts
 }
 
 add_Vhost(){
-	read -p "sepcify virtual host name " host
+	read -p "sepcify node name and virtual host name " node host
 
 	if [ -z $host ];then
 		echo "the virtual host is need"
 		return 1
 	fi
 
-	$ctl add_vhost $host
+	if [[ -z $node ]]; then
+		node=rabbit
+	fi
+
+	$ctl -n $node@$HOSTNAME add_vhost $host
+
 	return 0
 }
 
 stop_node(){
-	read -p "sepcify host " host
+	read -p "sepcify node " host
 
 	if [ -z $host ]; then
 		read -p "are you want to stop local node y/n? " yes_or_no
@@ -49,9 +64,17 @@ stop_node(){
 }
 
 stop_rabbit(){
-	echo "trying to stop the $host rabbit application "
-	$ctl stop_app
-	echo "rabbit application stopped "
+	read -p "which node do you want to stop " node
+
+	if [[ -z $node ]]; then
+		echo "trying to stop the rabbit node "
+		$ctl stop_app
+		echo "rabbit application stopped "
+	else
+		echo "trying to stop the $node rabbit node "
+		$ctl -n $node@$HOSTNAME  stop_app
+		echo "rabbit application stopped "
+	fi
 
 }
 
@@ -62,28 +85,44 @@ start_node(){
 }
 
 start_rabbit(){
-	echo "trying to start rabbit application "
-	$ctl start_app
-	echo "rabbit application started"
+	read -p "which node do you want to start " node
+
+	if [[ -z $node ]]; then
+		echo "trying to start rabbit application "
+		$ctl start_app
+		echo "rabbit application started"
+	else
+		echo "trying to start the $node rabbit node "
+		$ctl -n $node@$HOSTNAME  start_app
+		echo "rabbit application started "
+	fi
+
 }
 
 add_user(){
-    read -p "sepcify the user account and password you want to add " user password
+    read -p "sepcify node and  the user account and password you want to add " node user password
 
 	if [ -z $user ]; then
 		echo "user account can not be empty "
 		return 1
 	fi
 
-	echo "trying to add user $1 and pwd $2"
-	$ctl add_user $user $password
-	echo "user added"
+	if [[ -z $node ]]; then
+		echo "trying to add user $1 and pwd $2 to node rabbit"
+		$ctl add_user $user $password
+		echo "user added"
+	else
+		echo "trying to add user $1 and pwd $2 to node $host "
+		$ctl -n $node@$HOSTNAME add_user $user $password
+		echo "user added"
+	fi
+
 
 	return 0
 }
 
 delete_user(){
-	read -p "sepcify the user account you want to delete " user
+	read -p "sepcify the node and the user account you want to delete " node user
 
 	if [ -z $user ]; then
 		echo "user account can not be emtpy"
@@ -96,7 +135,12 @@ delete_user(){
 	case $yes_or_no in
 		yes|y|YES|Y)
 		echo "trying to delete user $1 "
-		$ctl delete_user $user
+		if [[ -z $node ]]; then
+			$ctl delete_user $user
+		else
+			$ctl -n $node@$HOSTNAME delete_user $user
+		fi
+		
 		echo "user deleted "
 		;;
 	esac
@@ -105,12 +149,19 @@ delete_user(){
 }
 
 list_users(){
-	$ctl list_users
+	read -p "specify node " node
+
+	if [[ -z $node ]]; then
+		$ctl list_users
+	else
+		$ctl -n $node@$HOSTNAME list_users
+	fi
+
 }
 
 change_password(){
 
-	read -p "sepcify the user account " user 
+	read -p "sepcify node and the user account " node user 
 	read -p "type the password " pass
 
 	if [ -z $user ]; then
@@ -123,7 +174,12 @@ change_password(){
 		return 1
 	fi
 
-	$ctl change_password $user $pass
+	if [[ -z $node ]]; then
+		$ctl change_password $user $pass
+	else
+		$ctl -n $node@$HOSTNAME change_password $user $pass
+	fi
+	
 
 	return 0
 }
@@ -158,8 +214,14 @@ set_permssion(){
 		r_read=''
 	fi
 
-	#echo " config:$a_config wirte:$a_write read:$a_read"
-	$ctl set_permissions -p $host $user "$r_config" "$r_write" "$r_read"
+	read -p "specify the node " node
+
+	if [[ -z $node ]]; then
+		$ctl set_permissions -p $host $user "$r_config" "$r_write" "$r_read"
+	else
+		$ctl -n $node@$HOSTNAME set_permissions -p $host $user "$r_config" "$r_write" "$r_read"
+	fi
+
 
 	return 0
 }
@@ -172,6 +234,8 @@ permissions(){
 		return 1
 	fi
 
+	read -p "specify the node " node
+
 	case $t in
 		-v)
 		
@@ -180,14 +244,24 @@ permissions(){
 			return 1
 		fi
 
-		$ctl list_permissions -p $n
+		if [[ -z $node ]]; then
+			$ctl list_permissions -p $n
+		else
+			$ctl -n $node@$HOSTNAME list_permissions -p $n
+		fi
+
 		;;
 		-u)
 		if [ -z $n ];then
 			echo "the user is needed"
 			return 1
 		fi
-		$ctl list_user_permissions $n
+
+		if [[ -z $node ]]; then
+			$ctl list_user_permissions $n
+		else
+			$ctl -n $node@$HOSTNAME list_user_permissions $n
+		fi
 		;;
 	esac
 
@@ -195,7 +269,7 @@ permissions(){
 }
 
 clear_permission(){
-	read -p "sepcify 1:host 2:user " host user
+	read -p "sepcify 1:host 2:user 3:node " host user node
 
 	if [ -z $host ];then
 		echo "the virtual host is needed "
@@ -207,45 +281,65 @@ clear_permission(){
 			return 1
 	fi
 
-	$ctl clear_permissions -p $host $user
+	if [[ -z $node ]]; then
+		$ctl clear_permissions -p $host $user
+	else
+		$ctl -n $node@$HOSTNAME clear_permissions -p $host $user
+	fi
 
 	return 0
 }
 
 queues(){
-	read -p "sepcify host " host 
+	read -p "sepcify node  host " node  host 
+	if [[ -z $node ]]; then
+		node=rabbit
+	fi
+
 	if [ -z $host ];then
-		$ctl list_queues name messages consumers memory
+		$ctl -n $node@$HOSTNAME list_queues name messages consumers memory
 	else
 		echo "display queues of default virtual host "
-		$ctl list_queues -p $host name messages consumers memory
+		$ctl -n $node@$HOSTNAME list_queues -p $host name messages consumers memory
 	fi
 }
 
 exchanges(){
-	read -p "sepcify host " host 
+	read -p "sepcify node host " node host 
+
+	if [[ -z $node ]]; then
+		node=rabbit
+	fi
 
 	if [ -z $host ];then
-		$ctl list_exchanges name 'type' durable auto_delete
+		$ctl -n $node@$HOSTNAME list_exchanges name 'type' durable auto_delete
 	else
-		$ctl list_exchanges -p $host name 'type' durable auto_delete
+		$ctl -n $node@$HOSTNAME list_exchanges -p $host name 'type' durable auto_delete
 	fi
 
 }
 
 bindings(){
-	read -p "sepcify host " host 
+	read -p "sepcify node host " host 
+	if [[ -z $node ]]; then
+		node=rabbit
+	fi
 
 	if [[ -z $host ]]; then
-	$ctl list_bindings -p $host
+	$ctl -n $node@$HOSTNAME list_bindings -p $host
 	else
-	$ctl list_bindings 
+	$ctl -n $node@$HOSTNAME list_bindings 
 	fi
 
 }
 
 clusters(){
-	$ctl cluster_status
+	read -p "specify node " node
+	if [[ -z $node ]]; then
+		node=rabbit
+	fi
+
+	$ctl -n $node@$HOSTNAME  cluster_status
 }
 declare -A fun_table fun_table=(["status"]=status 
 		["addhost"]=add_Vhost 

@@ -19,7 +19,7 @@ clustering(){
 
 	node=$1@$HOSTNAME
 
-	echo "stopping and resetting..."
+	echo "stopping and resetting $node..."
 	$ctl -n $node stop_app
 	$ctl -n $node reset
 
@@ -32,8 +32,18 @@ clustering(){
 		$ctl -n $node join_cluster $master 
 	fi
 
-
 	#restart the app
+	$ctl -n $node start_app
+}
+
+# remove the node from cluster
+# @$1 node name
+remove_from_cluster(){
+	node=$1@$HOSTNAME
+	echo "remove the node $node from cluster"
+
+	$ctl -n $node stop_app
+	$ctl -n $node reset
 	$ctl -n $node start_app
 }
 
