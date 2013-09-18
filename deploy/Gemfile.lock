@@ -1,0 +1,17 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    hiredis (0.4.5)
+    net-scp (1.1.2)
+      net-ssh (>= 2.6.5)
+    net-ssh (2.7.0)
+    redis (3.0.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  hiredis (~> 0.4.5)
+  net-scp (~> 1.1.2)
+  net-ssh (~> 2.7.0)
+  redis (~> 3.0.1)
