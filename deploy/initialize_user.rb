@@ -89,6 +89,22 @@ begin
 		client.query("update message set commented_count=#{comment_count} where msg_id='#{feed_id}'")
 	end
 
+	puts "clearing the group user dirty data"
+
+	group_users = client.query("select gu.group_id group_id, gu.user_id group_user_id,uf.following_id user_following_id  
+								from follow_group g inner join group_user gu 
+								on g.group_id=gu.group_id
+								left join user_following uf
+								ON gu.user_id=uf.following_id
+								AND g.creator_id=uf.user_id
+								where uf.following_id='' or uf.user_id is NULL;")
+
+	group_users.each do |users|
+		group_id = users['group_id']
+		user_id= users['group_user_id']
+
+		client.query("delete from group_user where group_id='#{group_id}' and user_id='#{user_id}'")
+	end
 
 	puts 'done'
 
