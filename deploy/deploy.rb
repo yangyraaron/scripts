@@ -30,7 +30,7 @@ end
 
 puts 'building...'
 
-system "cd /home/wisedulab2/wisedu_projects/Project/microblog-cache \n mvn install"
+system "cd /home/wisedulab2/wisedu_projects/Project/microblog-cache \n mvn clean \n mvn install"
 
 puts "uploading..."
 

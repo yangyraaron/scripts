@@ -2,7 +2,7 @@
 
 require 'mysql2'
 
-MYSQL_SERVER='172.16.206.16'
+MYSQL_SERVER='localhost'
 MYSQL_ACCOUNT='root'
 MYSQL_PASSWORD='123456'
 MYSQL_DATABASE='microblog'
@@ -87,6 +87,16 @@ begin
 		comment_count = row['comment_count']
 
 		client.query("update message set commented_count=#{comment_count} where msg_id='#{feed_id}'")
+	end
+
+	puts "clearing the comment dirty data"
+
+	dirty_comments = client.query("select cm.msg_id dst_msg_id,m.msg_id comment_msg_id from comment cm left join message m
+									on cm.msg_id=m.msg_id
+									where m.msg_id is null or m.msg_id=''")
+
+	dirty_comments.each do |comment|
+		client.query("delete from comment where msg_id='#{comment['dst_msg_id']}'")
 	end
 
 	puts "clearing the group user dirty data"
