@@ -7,7 +7,7 @@ Group=""
 Group_key= "users:#{Account}:groups"
 Group_follows="users:#{Account}:group:#{Group}:follows"
 
-redis = Redis.new(:host=>'172.16.206.30')
+redis = Redis.new(:host=>'localhost')
 
 # puts "flush all..."
 # redis.flushall
