@@ -6,3 +6,6 @@ export CLASSPATH=.:/lib/dt.jar:/lib/tools.jar
 
 
 ssh redis-v1210@172.16.206.30
+
+
+~/.rvm/bin/rvm-auto-ruby
