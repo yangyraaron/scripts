@@ -1,4 +1,4 @@
-# #!/bin/bash
+#!/bin/bash
 
 gperftools_url=https://gperftools.googlecode.com/files/gperftools-2.1.tar.gz
 libuwind_url=http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz

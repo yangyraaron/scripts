@@ -34,40 +34,37 @@ REMOTE_PATH="#{REMOTE_TOMCAT_PATH}/webapps/redis-test"
 # end
 #
 
-def sudo_exec(ssh,command)
-  ssh.open_channel do |channel|
-    channel.request_pty
-    channel.exec(command)
+def sudo_exec(channel,command)
+  channel.request_pty
+  channel.exec(command)
 
-    channel.on_close do
-      puts "shell terminated!"
-    end
-    channel.on_eof do |ch|
-      puts "remote end is done sending data"
-    end
-    channel.on_extended_data do |ch,type,data|
-      puts "got stderr:#{data.inspect}"
-    end
-    channel.on_data do |ch,data|
-      if data =~ /^\[sudo\] password for #{ACCOUNT}:/
-        puts "data works"
-        channel.send_data "#{PASSWORD}\n"
-      else
-        puts "OUTPUT NOT MATCHED: #{data}"
-      end
-
-      channel.on_data do |ch,data|
-        puts "in third"
-        puts data.inspect
-      end
-    end
-    channel.on_process do |ch|
-      puts "in process..."
-    end
-
-    channel.wait
-
+  channel.on_close do
+    puts "shell terminated!"
   end
+  channel.on_eof do |ch|
+    puts "remote end is done sending data"
+  end
+  channel.on_extended_data do |ch,type,data|
+    puts "got stderr:#{data.inspect}"
+  end
+  channel.on_data do |ch,data|
+    if data =~ /^\[sudo\] password for #{ACCOUNT}:/
+      puts "data works"
+      channel.send_data "#{PASSWORD}\n"
+    else
+      puts "OUTPUT NOT MATCHED: #{data}"
+    end
+
+    channel.on_data do |ch,data|
+      puts "in third"
+      puts data
+    end
+  end
+  channel.on_process do |ch|
+    puts "in process..."
+  end
+
+  channel.wait
 
 end
 
@@ -78,10 +75,10 @@ Net::SSH.start(SERVER,ACCOUNT,:password=>PASSWORD) do |ssh|
   #sudo_exec(ssh,"mkdir #{REMOTE_PATH}")
 
   ssh.exec!("rm -r #{REMOTE_PATH}") do |channel,stream,data|
-  	ConsoleLogger.ssh_log(stream,data)
+    ConsoleLogger.ssh_log(stream,data)
   end
   ssh.exec!("mkdir #{REMOTE_PATH}") do |channel,stream,data|
-  	ConsoleLogger.ssh_log(stream,data)
+    ConsoleLogger.ssh_log(stream,data)
   end
 end
 
@@ -94,9 +91,14 @@ end
 puts "restarting tomcat..."
 
 Net::SSH.start(SERVER,ACCOUNT,:password=>PASSWORD) do |ssh|
+	ssh.open_channel do |channel|
+		puts "shutdown ..."
+		#sudo_exec(channel,"sudo #{REMOTE_TOMCAT_PATH}/bin/shutdown.sh")
+		#channel.wait
+		puts "startup ..."
+  		sudo_exec(channel,"sudo #{REMOTE_TOMCAT_PATH}/bin/startup.sh")
+	end
 
-  #sudo_exec(ssh,"sudo #{REMOTE_TOMCAT_PATH}/bin/shutdown.sh")
-  sudo_exec(ssh,"sudo #{REMOTE_TOMCAT_PATH}/bin/startup.sh")
   # ssh.exec!("echo 123456 | sudo -S #{REMOTE_TOMCAT_PATH}/bin/shutdown.sh") do |channel,stream,data|
   #   ConsoleLogger.ssh_log(stream,data)
   # end
