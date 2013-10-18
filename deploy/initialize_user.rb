@@ -2,7 +2,7 @@
 
 require 'mysql2'
 
-MYSQL_SERVER='localhost'
+MYSQL_SERVER='172.16.206.16'
 MYSQL_ACCOUNT='root'
 MYSQL_PASSWORD='123456'
 MYSQL_DATABASE='microblog'

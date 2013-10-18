@@ -1,0 +1,2 @@
+insert into `fixedAsset`.`OTHEREQUIPMENT` (`newId`,`equipmentName`,`purchaseDate`,`supplier`,`price`,`lastUserId`,`remark`,`reject`,`rejectDate`) values ('109-004','奥迪轿车','2011.11.29','南京朗驰集团苏奧汽车销售服务有限公司','366700','','','','');
+insert into `fixedAsset`.`OTHEREQUIPMENT` (`newId`,`equipmentName`,`purchaseDate`,`supplier`,`price`,`lastUserId`,`remark`,`reject`,`rejectDate`) values ('109-005','大众商务车','2011.9','','290000','','','','');

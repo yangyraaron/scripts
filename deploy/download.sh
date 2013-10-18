@@ -4,8 +4,8 @@ account=root@172.16.206.16
 folder=/opt/apache-tomcat-7.0.37/logs/
 save_folder=~/16_tomcat/
 
-declare -a data_files=('localhost_access_log.2013-10-09.txt' 'localhost.2013-10-09.log' 
-	'catalina.2013-10-09.log')
+declare -a data_files=('localhost_access_log.2013-10-16.txt' 'localhost.2013-10-16.log' 
+	'catalina.2013-10-16.log' 'catalina.out')
 
 for f in ${data_files[@]}; do
 	file_path=$folder$f
