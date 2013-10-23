@@ -1,11 +1,31 @@
 #!/bin/bash
 
-account=root@172.16.206.16
-folder=/opt/apache-tomcat-7.0.37/logs/
-save_folder=~/16_tomcat/
+# account=root@172.16.206.16
+# folder=/opt/apache-tomcat-7.0.37/logs/
+# save_folder=~/16_tomcat/
 
-declare -a data_files=('localhost_access_log.2013-10-16.txt' 'localhost.2013-10-16.log' 
-	'catalina.2013-10-16.log' 'catalina.out')
+# declare -a data_files=('localhost_access_log.2013-10-16.txt' 'localhost.2013-10-16.log' 
+# 	'catalina.2013-10-16.log' 'catalina.out')
+
+# for f in ${data_files[@]}; do
+# 	file_path=$folder$f
+# 	echo "downloading $file_path ..."
+
+# 	scp $account:$file_path $save_folder$f
+# done
+
+# echo "done"
+
+account=root@172.16.206.16
+folder=/opt/apache-tomcat-7.0.37/conf/
+save_folder=~/deploy_env/16_tomcat/conf/
+
+if [[ ! -d $save_folder ]]; then
+	mkdir -p $save_folder
+fi
+
+declare -a data_files=('server.xml' 'context.xml' 
+	'tomcat-users.xml')
 
 for f in ${data_files[@]}; do
 	file_path=$folder$f
@@ -15,6 +35,7 @@ for f in ${data_files[@]}; do
 done
 
 echo "done"
+
 
 
 # account=mysql-lab2@172.16.206.17
