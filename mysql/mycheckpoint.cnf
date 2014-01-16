@@ -1,0 +1,11 @@
+[mycheckpoint]
+#smtp_host = mail.my-server-company.com
+#smtp_from = monitor@my-server-company.com
+#smtp_to = dba@my-server-company.com
+
+[client]
+host=127.0.0.1
+socket=/tmp/mysql.sock
+user=root
+password=123456
+port=3306

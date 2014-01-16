@@ -96,7 +96,7 @@ Net::SSH.start(SERVER,ACCOUNT,:password=>PASSWORD) do |ssh|
 		#sudo_exec(channel,"sudo #{REMOTE_TOMCAT_PATH}/bin/shutdown.sh")
 		#channel.wait
 		puts "startup ..."
-  		sudo_exec(channel,"sudo #{REMOTE_TOMCAT_PATH}/bin/startup.sh")
+  		ssh.exec(channel,"sudo #{REMOTE_TOMCAT_PATH}/bin/startup.sh")
 	end
 
   # ssh.exec!("echo 123456 | sudo -S #{REMOTE_TOMCAT_PATH}/bin/shutdown.sh") do |channel,stream,data|

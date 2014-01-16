@@ -21,7 +21,7 @@ class TableReader:
 		ri=1
 		for row in self.sheet.iter_rows():
 			entity={}
-			ci=0;
+			ci=0
 			for cell in row:#range(self.col_begin,self.col_end):
 				if(ci>=self.col_begin and ci<=self.col_end):
 				#	cell = self.sheet.cell(row=ri,column=ci)
@@ -47,7 +47,7 @@ class TableReader:
 		# 	self.header.append(header_cell.value)
 		# hi=0
 		for row in self.sheet.iter_rows():
-			ci=0;
+			ci=0
 			for cell in row:
 				if (ci>=self.col_begin and ci<=self.col_end):
 					self.header.append(cell.internal_value)

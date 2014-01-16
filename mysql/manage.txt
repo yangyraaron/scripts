@@ -1,0 +1,5 @@
+#memcached
+active:
+mysql> install plugin daemon_memcached soname "libmemcached.so";
+turn off:
+mysql> uninstall plugin daemon_memcached;

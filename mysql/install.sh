@@ -10,16 +10,16 @@ echo "add  a account mysql into mysql group ..."
 sudo useradd -g mysql mysql
 
 echo "extracting the mysql file..."
-dir_mysql_file=/usr/local/mysql-5.6.11
+dir_mysql_file=/usr/local/mysql-5.6.14
  
 cd /usr/local
 
 sudo mkdir $dir_mysql_file
 sudo ln -s $dir_mysql_file mysql
 
-tar zxvf ~/dev_softwares/mysql/mysql-5.6.11.tar.gz
-sudo mv mysql-5.6.11-linux-glibc2.5-x86_64/* $dir_mysql_file
-rm -r mysql-5.6.11-linux-glibc2.5-x86_64
+sudo tar zxvf ~/softwares/mysql-5.6.14-linux-glibc2.5-x86_64.tar.gz
+sudo mv mysql-5.6.14-linux-glibc2.5-x86_64/* $dir_mysql_file
+sudo rm -r mysql-5.6.14-linux-glibc2.5-x86_64
 
 cd mysql
 
